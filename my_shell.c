@@ -27,22 +27,22 @@ int analyze_cmd(int,char**);
 void do_cmd(int,char**);
 
 int main(int argc,char*argv){
-    signal(SIGHUP,SIG_IGN);
-    signal(SIGTTIN,SIG_IGN);
-    signal(SIGTTOU,SIG_IGN);
-    signal(SIGINT,SIG_IGN);
-    signal(SIGTSTP,SIG_IGN); 
-    while(1){
-      char*argv[MAX]={NULL};
-      printname();
-      char*command=readline("");//readline函数输出给出的字符串并读取一行输入，并为读取的输入动态分配内存，返回值为指向读取输入的指针
-      if (command == NULL) continue;//屏蔽ctrl+d 
-      int argc=1;  
-      argv[0] = strtok(command, " ");
-      for(int i=1;argv[i] = strtok(NULL, " ");i++) argc++;//将命令行输入分割为多个命令
-      analyze_cmd(argc,argv);//解析命令
-      do_cmd(argc,argv);//实现命令
-      free(command);  
+  signal(SIGHUP,SIG_IGN);
+  signal(SIGTTIN,SIG_IGN);
+  signal(SIGTTOU,SIG_IGN);
+  signal(SIGINT,SIG_IGN);
+  signal(SIGTSTP,SIG_IGN); 
+  while(1){
+    char*argv[MAX]={NULL};
+    printname();
+    char*command=readline("");//readline函数输出给出的字符串并读取一行输入，并为读取的输入动态分配内存，返回值为指向读取输入的指针
+    if (command == NULL) continue;//屏蔽ctrl+d 
+    int argc=1;  
+    argv[0] = strtok(command, " ");
+    for(int i=1;argv[i] = strtok(NULL, " ");i++) argc++;//将命令行输入分割为多个命令
+    analyze_cmd(argc,argv);//解析命令
+    do_cmd(argc,argv);//实现命令
+    free(command);  
     }
 }
 void printname(){
@@ -69,41 +69,20 @@ int analyze_cmd(int argc,char*argv[]){
     }
 }
 void do_cmd(int argc,char*argv[]){
-    if(pass==1)
-  {
-    argc--;
-  }
-  if (cd == 1)
-  {
-    mycd(argv);
-  }
-  else if (strcmp(argv[0], "history") == 0)
-  {
-    ShowHistory();
-  }
+  if(pass==1) argc--;
+  if (cd == 1) mycd(argv);
+  else if (strcmp(argv[0], "history") == 0) ShowHistory();//展示历史命令
   else if (strcmp(argv[0], "exit") == 0)
   {
     printf("exit\n");
     printf("有停止的任务\n");
     exit(0);
   }
-  else if ( o_redir== 1) //输出重定向'>'
-  {
-    mydup(argv);
-  }
-  else if (pipe == 1) //管道'|'
-  {
-    callCommandWithPipe(argv, argc);
-  }
-  else if ( a_o_redir== 1)// >>
-  {
-    mydup2(argv);
-  }
-  else if ( i_redir== 1)// <
-  {
-    mydup3(argv);
-  }
-  else //需要子进程进行执行的第三方函数
+  else if ( o_redir== 1) mydup(argv);//>
+  else if (pipe == 1) callCommandWithPipe(argv, argc);//管道 |
+  else if ( a_o_redir== 1) mydup2(argv);// >>
+  else if ( i_redir== 1) mydup3(argv);// <
+  else //需要fork子进程进行执行的命令
   {
     if (strcmp(argv[0], "ll") == 0)
     {
