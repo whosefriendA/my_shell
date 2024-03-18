@@ -76,18 +76,6 @@ int analyze_cmd(int argc,char*argv[]){
 
 void do_cmd(int argc,char*argv[]){
   if(pass==1) argc--;
-  if (cd == 1) ;//mycd(argv);
-  else if (strcmp(argv[0], "history") == 0); //ShowHistory();//展示历史命令
-  else if (strcmp(argv[0], "exit") == 0)
-  {
-    printf("exit\n");
-    printf("有停止的任务\n");
-    exit(0);
-  }
-  else if ( o_redir== 1) ;//mydup(argv);//>
-  else if ( _pipe == 1); //callCommandWithPipe(argv, argc);//管道 |
-  else if ( a_o_redir== 1); //mydup2(argv);// >>
-  else if ( i_redir== 1); //mydup3(argv);// <
   else //需要fork子进程进行执行的命令
   {
     if (strcmp(argv[0], "ls") == 0)
