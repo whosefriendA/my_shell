@@ -21,9 +21,11 @@
     int a_i_redir=0;
     int a_o_redir=0;
     int pass=0;
+
 void printname(void);
 int analyze_cmd(int,char**);
 void do_cmd(int,char**);
+
 int main(int argc,char*argv){
     signal(SIGHUP,SIG_IGN);
     signal(SIGTTIN,SIG_IGN);
