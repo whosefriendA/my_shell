@@ -31,41 +31,40 @@ int main(int argc,char*argv){
     signal(SIGINT,SIG_IGN);
     signal(SIGTSTP,SIG_IGN); 
     while(1){
-        char*argv[MAX]={NULL};
-        printname();
-        char*command=readline("");//readline函数输出给出的字符串并读取一行输入，并为读取的输入动态分配内存，返回值为指向读取输入的指针
-        if (command == NULL) continue;//屏蔽ctrl+d 
-        int argc=1;  
-        argv[0] = strtok(command, " ");
-        for(int i=1;argv[i] = strtok(NULL, " ");i++) argc++;//将命令行输入分割为多个命令
-        analyze_cmd(argc,argv);//解析命令
-        do_cmd(argc,argv);//实现命令
-        free(command);
+      char*argv[MAX]={NULL};
+      printname();
+      char*command=readline("");//readline函数输出给出的字符串并读取一行输入，并为读取的输入动态分配内存，返回值为指向读取输入的指针
+      if (command == NULL) continue;//屏蔽ctrl+d 
+      int argc=1;  
+      argv[0] = strtok(command, " ");
+      for(int i=1;argv[i] = strtok(NULL, " ");i++) argc++;//将命令行输入分割为多个命令
+      analyze_cmd(argc,argv);//解析命令
+      do_cmd(argc,argv);//实现命令
+      free(command);  
     }
 }
 void printname(){
-        char pathname[PATHMAX];
-        getcwd(pathname,PATHMAX);
-        printf(BLUE"Whosefrienda-shell"CLOSE);
-        printf(GREEN" :%s"CLOSE,pathname);
-        printf(" $ ");
-        fflush(stdout);
+    char pathname[PATHMAX];
+    getcwd(pathname,PATHMAX);
+    printf(BLUE"Whosefrienda-shell"CLOSE);
+    printf(GREEN" :%s"CLOSE,pathname);
+    printf(" $ ");
+    fflush(stdout);
 }
 int analyze_cmd(int argc,char*argv[]){
     if (argv[0] == NULL) return 0;
     if (strcmp(argv[0], "cd") == 0) cd = 1;
-    for (int i = 0; i < argc; i++)
-        {
-          if (strcmp(argv[i], ">") == 0) o_redir = 1;
-          if (strcmp(argv[i], "|") == 0) _pipe = 1;
-          if (strcmp(argv[i], ">>") == 0) a_o_redir = 1;
-          if (strcmp(argv[i], "<") == 0) i_redir = 1;
-          if (strcmp(argv[i], "<<") == 0) a_i_redir = 1;
-          if (strcmp(argv[i], "&") == 0){
-             pass = 1;
-             argv[i]=NULL;
-           }
-        }
+    for (int i = 0; i < argc; i++){
+      if (strcmp(argv[i], ">") == 0) o_redir = 1;
+      if (strcmp(argv[i], "|") == 0) _pipe = 1;
+      if (strcmp(argv[i], ">>") == 0) a_o_redir = 1;
+      if (strcmp(argv[i], "<") == 0) i_redir = 1;
+      if (strcmp(argv[i], "<<") == 0) a_i_redir = 1;
+      if (strcmp(argv[i], "&") == 0){
+        pass = 1;
+        argv[i]=NULL;
+      }
+    }
 }
 void do_cmd(int argc,char*argv[]){
     if(pass==1)
