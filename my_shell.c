@@ -14,17 +14,19 @@
 #define BLUE "\033[34m"
 #define GREEN "\033[32m"
 #define CLOSE "\033[0m"
-    int cd =0;
-    int i_redir=0;
-    int o_redir=0;
-    int _pipe=0;
-    int a_i_redir=0;
-    int a_o_redir=0;
-    int pass=0;
+
+int cd =0;
+int i_redir=0;
+int o_redir=0;
+int _pipe=0;
+int a_i_redir=0;
+int a_o_redir=0;
+int pass=0;//命令解析的参数
 
 void printname(void);
 int analyze_cmd(int,char**);
 void do_cmd(int,char**);
+void clear_para();
 
 int main(int argc,char*argv){
   signal(SIGHUP,SIG_IGN);
@@ -42,9 +44,11 @@ int main(int argc,char*argv){
     for(int i=1;argv[i] = strtok(NULL, " ");i++) argc++;//将命令行输入分割为多个命令
     analyze_cmd(argc,argv);//解析命令
     do_cmd(argc,argv);//实现命令
-    free(command);  
+    free(command); 
+    clear_para();
     }
 }
+
 void printname(){
     char pathname[PATHMAX];
     getcwd(pathname,PATHMAX);
@@ -53,6 +57,7 @@ void printname(){
     printf(" $ ");
     fflush(stdout);
 }
+
 int analyze_cmd(int argc,char*argv[]){
     if (argv[0] == NULL) return 0;
     if (strcmp(argv[0], "cd") == 0) cd = 1;
@@ -68,27 +73,23 @@ int analyze_cmd(int argc,char*argv[]){
       }
     }
 }
+
 void do_cmd(int argc,char*argv[]){
   if(pass==1) argc--;
-  if (cd == 1) mycd(argv);
-  else if (strcmp(argv[0], "history") == 0) ShowHistory();//展示历史命令
+  if (cd == 1) ;//mycd(argv);
+  else if (strcmp(argv[0], "history") == 0); //ShowHistory();//展示历史命令
   else if (strcmp(argv[0], "exit") == 0)
   {
     printf("exit\n");
     printf("有停止的任务\n");
     exit(0);
   }
-  else if ( o_redir== 1) mydup(argv);//>
-  else if (pipe == 1) callCommandWithPipe(argv, argc);//管道 |
-  else if ( a_o_redir== 1) mydup2(argv);// >>
-  else if ( i_redir== 1) mydup3(argv);// <
+  else if ( o_redir== 1) ;//mydup(argv);//>
+  else if ( _pipe == 1); //callCommandWithPipe(argv, argc);//管道 |
+  else if ( a_o_redir== 1); //mydup2(argv);// >>
+  else if ( i_redir== 1); //mydup3(argv);// <
   else //需要fork子进程进行执行的命令
   {
-    if (strcmp(argv[0], "ll") == 0)
-    {
-      strcpy(argv[0], "ls");
-      argv[argc++] = "-l";
-    }
     if (strcmp(argv[0], "ls") == 0)
       argv[argc++] = "--color=auto";
     pid_t pid = fork();
@@ -97,13 +98,13 @@ void do_cmd(int argc,char*argv[]){
       perror("fork");
       exit(1);
     }
-    else if (pid == 0) //子进程
+    else if (pid == 0) //若fork后优先调用子进程占用cpu
     {
-      execvp(argv[0], argv); //执行命令
+      execvp(argv[0], argv);
       perror("commod");
       exit(1);
     }
-    else if (pid > 0) //父进程
+    else if (pid > 0) //若fork后优先调用父进程占用cpu
     {
       if(pass==1)
       {
@@ -114,4 +115,13 @@ void do_cmd(int argc,char*argv[]){
       waitpid(pid, NULL, 0);
     }
   }
+}
+void clear_para(){
+cd =0;
+i_redir=0;
+o_redir=0;
+_pipe=0;
+a_i_redir=0;
+a_o_redir=0;
+pass=0;
 }
