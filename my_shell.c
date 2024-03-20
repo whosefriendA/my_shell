@@ -19,12 +19,17 @@ int cd =0;
 int i_redir=0;
 int o_redir=0;
 int _pipe=0;
-int a_i_redir=0;
 int a_o_redir=0;
-int pass=0;//命令解析的参数
+int backpro=0;//命令解析的参数
 
 void printname(void);
 int analyze_cmd(int,char**);
+void mycd(char *argv[]);
+void oredir(char *argv[]);
+void aoredir(char *argv[]);
+void iredir(char *argv[]);
+void mypipe(char *argv[], int );
+void mui_mypipe(char *argv[], int );
 void do_cmd(int,char**);
 void clear_para();
 
@@ -66,20 +71,31 @@ int analyze_cmd(int argc,char*argv[]){
       if (strcmp(argv[i], "|") == 0) _pipe = 1;
       if (strcmp(argv[i], ">>") == 0) a_o_redir = 1;
       if (strcmp(argv[i], "<") == 0) i_redir = 1;
-      if (strcmp(argv[i], "<<") == 0) a_i_redir = 1;
       if (strcmp(argv[i], "&") == 0){
-        pass = 1;
+        backpro = 1;
         argv[i]=NULL;
       }
     }
 }
 
 void do_cmd(int argc,char*argv[]){
-  if(pass==1) argc--;
+  if(backpro==1) argc--;
+  if (cd == 1) mycd(argv);
+  else if (strcmp(argv[0], "history") == 0) ShowHistory();//展示历史命令
+  else if (strcmp(argv[0], "exit") == 0)
+  {
+    printf("exit\n");
+    printf("有停止的任务\n");
+    exit(0);
+  }
+  else if ( o_redir== 1) oredir(argv);// >
+  else if ( _pipe == 1) mul_mypipe(argv, argc);// |
+  else if ( a_o_redir== 1)aoredir(argv);// >>
+  else if ( i_redir== 1) iredir(argv);// <
   else //需要fork子进程进行执行的命令
   {
     if (strcmp(argv[0], "ls") == 0)
-      argv[argc++] = "--color=auto";
+    argv[argc++] = "--color=auto";
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -89,14 +105,14 @@ void do_cmd(int argc,char*argv[]){
     else if (pid == 0) //若fork后优先调用子进程占用cpu
     {
       execvp(argv[0], argv);
-      perror("commod");
+      perror("command");
       exit(1);
     }
     else if (pid > 0) //若fork后优先调用父进程占用cpu
     {
-      if(pass==1)
+      if(backpro==1)
       {
-        pass=0;
+        backpro=0;
         printf("%d\n",pid);
         return;
       }
@@ -104,12 +120,11 @@ void do_cmd(int argc,char*argv[]){
     }
   }
 }
+
 void clear_para(){
 cd =0;
 i_redir=0;
 o_redir=0;
 _pipe=0;
-a_i_redir=0;
 a_o_redir=0;
-pass=0;
 }
