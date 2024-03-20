@@ -8,6 +8,7 @@
 #include<fcntl.h>
 #include<dirent.h>
 #include<readline/readline.h>
+#include <readline/history.h>
 #include<errno.h>
 #define PATHMAX 4096
 #define MAX 200
@@ -24,12 +25,12 @@ int backpro=0;//命令解析的参数
 
 void printname(void);
 int analyze_cmd(int,char**);
+void showhistory();
 void mycd(char *argv[]);
 void oredir(char *argv[]);
 void aoredir(char *argv[]);
 void iredir(char *argv[]);
-void mypipe(char *argv[], int );
-void mui_mypipe(char *argv[], int );
+void mymulpipe(char *argv[], int );
 void do_cmd(int,char**);
 void clear_para();
 
@@ -89,7 +90,7 @@ void do_cmd(int argc,char*argv[]){
     exit(0);
   }
   else if ( o_redir== 1) oredir(argv);// >
-  else if ( _pipe == 1) mul_mypipe(argv, argc);// |
+  else if ( _pipe == 1) mymulpipe(argv, argc);// |
   else if ( a_o_redir== 1)aoredir(argv);// >>
   else if ( i_redir== 1) iredir(argv);// <
   else //需要fork子进程进行执行的命令
@@ -112,7 +113,6 @@ void do_cmd(int argc,char*argv[]){
     {
       if(backpro==1)
       {
-        backpro=0;
         printf("%d\n",pid);
         return;
       }
@@ -120,7 +120,52 @@ void do_cmd(int argc,char*argv[]){
     }
   }
 }
+void showhistory()
+{
+  int i = 0;
+  HIST_ENTRY **his;
+  his = history_list();
+  while (his[i] != NULL)
+    printf("%-3d   %s\n", i, his[i++]->line);
+}
+char lastpath[MAX];//为实现cd-而声明
+void mycd(char *argv[]){
+if (argv[1] == NULL)//未输入要跳转的目录的情况
+  {
+    getcwd(lastpath, sizeof(lastpath));
+    chdir("/home");
+  }
+  else if (strcmp(argv[1], "-") == 0)//实现cd -
+  {
+    char newlastpath[MAX];
+    getcwd(newlastpath, sizeof(lastpath));
+    chdir(lastpath);
+    printf("%s\n", lastpath);
+    strcpy(lastpath, newlastpath);
+  }
+  else if (strcmp(argv[1], "~") == 0)//跳转主目录（这里的代码是跳转到我自己的主目录wanggang）
+  {
+    getcwd(lastpath, sizeof(lastpath));
+    chdir("/home/wanggang");
+  }
+  else
+  {
+    getcwd(lastpath, sizeof(lastpath));
+    chdir(argv[1]);
+  }
+}
+void oredir(char *argv[]){
 
+}
+void aoredir(char *argv[]){
+
+}
+void iredir(char *argv[]){
+
+}
+void mymulpipe(char *argv[], int argc ){
+
+}
 void clear_para(){
 cd =0;
 i_redir=0;
