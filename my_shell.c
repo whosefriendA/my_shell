@@ -12,7 +12,7 @@
 #include<errno.h>
 #define PATHMAX 4096
 #define MAX 200
-#define BLUE "\033[34m"
+#define BLUE "\033[34m"//宏定义实现有色字体
 #define GREEN "\033[32m"
 #define CLOSE "\033[0m"
 
@@ -91,7 +91,7 @@ void do_cmd(int argc,char*argv[]){
   }
   else if ( o_redir== 1) oredir(argv);// >
   else if ( _pipe == 1) mymulpipe(argv, argc);// |
-  else if ( a_o_redir== 1)aoredir(argv);// >>
+  else if ( a_o_redir== 1) aoredir(argv);// >>
   else if ( i_redir== 1) iredir(argv);// <
   else //需要fork子进程进行执行的命令
   {
@@ -103,13 +103,13 @@ void do_cmd(int argc,char*argv[]){
       perror("fork");
       exit(1);
     }
-    else if (pid == 0) //若fork后优先调用子进程占用cpu
+    else if (pid == 0) //子进程
     {
       execvp(argv[0], argv);
       perror("command");
       exit(1);
     }
-    else if (pid > 0) //若fork后优先调用父进程占用cpu
+    else if (pid > 0) //父进程
     {
       if(backpro==1)
       {
@@ -155,10 +155,77 @@ if (argv[1] == NULL)//未输入要跳转的目录的情况
   }
 }
 void oredir(char *argv[]){
-
+char *preargv[MAX] = {NULL};
+  int i = 0;
+  while (strcmp(argv[i], ">"))
+  {
+    preargv[i] = argv[i];
+    i++;
+  }
+  int argc=i;//重定向前面参数的个数
+  i++;
+  //出现 echo "adcbe" > test.c  这种情况
+  int fdout = dup(1);//让标准输出获取一个新的文件描述符
+  int fd = open(argv[i], O_WRONLY | O_CREAT | O_TRUNC,0666); //只写模式|表示如果指定文件不存在，则创建这个文件|表示截断，如果文件存在，并且以只写、读写方式打开，则将其长度截断为0。
+  dup2(fd, 1);
+  pid_t pid = fork();
+  if (pid == 0) //子进程
+  {
+    if (_pipe=1) //管道'|'
+    {
+      mymulpipe(preargv, argc);
+    }
+    else
+     execvp(preargv[0], preargv);
+  }
+  else if (pid > 0)//父进程
+  {
+     if(backpro==1)
+      {
+        backpro=0;
+        printf("%d\n",pid);
+        return;
+      }
+    waitpid(pid, NULL, 0);
+  }
+  dup2(fdout, 1);//
 }
 void aoredir(char *argv[]){
 
+  char *preargv[MAX] = {NULL};
+  int i = 0;
+  
+  while (strcmp(argv[i], ">>"))
+  {
+    preargv[i] = argv[i];
+    i++;
+  }
+  int argc=i;//重定向前面参数的个数
+  i++;
+  int fdout = dup(1);//让标准输出获取一个新的文件描述符
+  int fd = open(argv[i], O_WRONLY | O_CREAT | O_APPEND,0666); //只写模式|表示如果指定文件不存在，则创建这个文件|表示追加，如果原来文件里面有内容，则这次写入会写在文件的最末尾。
+  pid_t pid = fork();
+   dup2(fd, 1);
+  if (pid == 0) //子进程
+  {
+    if (flag == 3) //管道'|'
+      {
+        mymulpipe(strc, number);
+      }
+      else
+       execvp(preargv[0], preargv);
+  }
+  else if (pid > 0)
+  {
+     if(backp==1)
+      {
+        backp=0;
+        printf("%d\n",pid);
+        return;
+      }
+    waitpid(pid, NULL, 0);
+  }
+  dup2(fdout, 1); 
 }
 void iredir(char *argv[]){
 
