@@ -34,12 +34,9 @@ void mymulpipe(char *argv[], int );
 void do_cmd(int,char**);
 void clear_para();
 
-int main(int argc,char*argv){
-  signal(SIGHUP,SIG_IGN);
-  signal(SIGTTIN,SIG_IGN);
-  signal(SIGTTOU,SIG_IGN);
-  signal(SIGINT,SIG_IGN);
-  signal(SIGTSTP,SIG_IGN); 
+int main(){
+  signal(SIGINT,SIG_IGN);//屏蔽ctrl+c
+  signal(SIGTSTP,SIG_IGN); //屏蔽ctrl+z
   while(1){
     char*argv[MAX]={NULL};
     printname();
@@ -50,18 +47,18 @@ int main(int argc,char*argv){
     for(int i=1;argv[i] = strtok(NULL, " ");i++) argc++;//将命令行输入分割为多个命令
     analyze_cmd(argc,argv);//解析命令
     do_cmd(argc,argv);//实现命令
-    free(command); 
-    clear_para();
+    free(command); //释放空间
+    clear_para();//重置参数
     }
 }
 
 void printname(){
     char pathname[PATHMAX];
-    getcwd(pathname,PATHMAX);
-    printf(BLUE"Whosefrienda-shell"CLOSE);
-    printf(GREEN" :%s"CLOSE,pathname);
+    getcwd(pathname,PATHMAX);//获取当前目录
+    printf(BLUE"Whosefrienda-shell"CLOSE);//打印shell名称
+    printf(GREEN" :%s"CLOSE,pathname);//打印路径
     printf("$ ");
-    fflush(stdout);
+    fflush(stdout);//清除缓冲区
 }
 
 int analyze_cmd(int argc,char*argv[]){
@@ -241,7 +238,7 @@ char *preargv[MAX] = {NULL};
   i++;
   int preargc=i;//重定向前面参数的个数
   int fdin = dup(0);//让标准输入获取一个新的文件描述符
-  int fd = open(argv[i], O_RDONLY,0666); //只读模式
+  int fd = open(argv[i], O_RDONLY,0666); //只读模式框架
    dup2(fd, 0);
   pid_t pid = fork();
   if (pid == 0) //子进程
