@@ -269,7 +269,7 @@ pid_t pid;
   char* cmd[cmd_count][10];
   for(int i=0;i<cmd_count;i++)//将命令以管道分割存放组数组里
   {
-    if(i==0)//第一个命令
+    if(i==0)
     {
       int n=0;
       for(int j=0;j<index[i];j++)
@@ -278,7 +278,7 @@ pid_t pid;
       }
       cmd[i][n]=NULL;
     }
-    else if(i==number)//最后一个命令
+    else if(i==number)
     {
       int n=0;
       for(int j=index[i-1]+1;j<argc;j++)
@@ -296,7 +296,7 @@ pid_t pid;
       }
       cmd[i][n]=NULL;
     }
-  }//经过上述操作，我们已经将指令以管道为分隔符分好,下面我们就可以创建管道了
+  }//命令已经分割好了，下面可以创建管道了。
   int fd[number][2];  //存放管道的描述符
   for(int i=0;i<number;i++)//循环创建多个管道
   {
@@ -306,7 +306,7 @@ pid_t pid;
   for(i=0;i<cmd_count;i++)//父进程循环创建多个并列子进程
   {
     pid=fork();
-    if(pid==0)//子进程直接退出循环，不参与进程的创建
+    if(pid==0)//子进程退出，防止创建过多进程
     break;
   }
   if(pid==0)//子进程
@@ -324,7 +324,7 @@ pid_t pid;
           close(fd[j][0]);
         }
       }
-      else if(i==number)//最后一个进程
+      else if(i==number)//最后一个子进程
       {
         dup2(fd[i-1][0],0);//打开读端
         close(fd[i-1][1]);//关闭写端
@@ -357,8 +357,8 @@ pid_t pid;
     perror("execvp");
     exit(1);
   }
-  //父进程什么都不干，把管道的所有口都关掉
-    for(i=0;i<number;i++)
+  else{//父进程
+   for(i=0;i<number;i++)
     {
         close(fd[i][0]);
         close(fd[i][1]);//父进程端口全部关掉
@@ -372,6 +372,7 @@ pid_t pid;
       }
   for(int j=0;j<cmd_count;j++)//父进程等待子进程
   wait(NULL);
+}
 }
 void clear_para(){
 cd =0;
