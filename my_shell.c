@@ -35,13 +35,15 @@ void do_cmd(int,char**);
 void clear_para();
 
 int main(){
+  read_history(NULL);
   signal(SIGINT,SIG_IGN);//屏蔽ctrl+c
   signal(SIGTSTP,SIG_IGN); //屏蔽ctrl+z
   while(1){
     char*argv[MAX]={NULL};
     printname();
     char*command=readline(" ");//readline函数输出给出的字符串并读取一行输入，并为读取的输入动态分配内存，返回值为指向读取输入的指针
-    if (command == NULL) continue;//屏蔽ctrl+d 
+    if (command == NULL) {printf("\n");continue;}//屏蔽ctrl+d 
+    if (strlen(command) == 0) continue;//回车不爆栈
     int argc=1;  
     argv[0] = strtok(command, " ");
     for(int i=1;argv[i] = strtok(NULL, " ");i++) argc++;//将命令行输入分割为多个命令
