@@ -265,9 +265,9 @@ pid_t pid;
   int number=0;//统计管道个数
   for(int i=0;i<argc;i++)
     if(!strcmp(argv[i],"|")) index[number++]=i;
-  int cmd_count=number+1;//命令个数
-  char* cmd[cmd_count][10];
-  for(int i=0;i<cmd_count;i++)//将命令以管道分割存放组数组里
+  int cmdcount=number+1;//命令个数
+  char* cmd[cmdcount][10];
+  for(int i=0;i<cmdcount;i++)//将命令以管道分割存放组数组里
   {
     if(i==0)
     {
@@ -303,7 +303,7 @@ pid_t pid;
     pipe(fd[i]);
   }
   int i=0;
-  for(i=0;i<cmd_count;i++)//父进程循环创建多个并列子进程
+  for(i=0;i<cmdcount;i++)//父进程循环创建多个并列子进程
   {
     pid=fork();
     if(pid==0)//子进程退出，防止创建过多进程
@@ -370,7 +370,7 @@ pid_t pid;
         printf("%d\n",pid);
         return;
       }
-  for(int j=0;j<cmd_count;j++)//父进程等待子进程
+  for(int j=0;j<cmdcount;j++)//父进程等待子进程
   wait(NULL);
 }
 }
