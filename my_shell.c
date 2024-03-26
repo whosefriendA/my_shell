@@ -238,7 +238,7 @@ char *preargv[MAX] = {NULL};
   i++;
   int preargc=i;//重定向前面参数的个数
   int fdin = dup(0);//让标准输入获取一个新的文件描述符
-  int fd = open(argv[i], O_RDONLY,0666); //只读模式框架
+  int fd = open(argv[i], O_RDONLY,0666); //只读模式
    dup2(fd, 0);
   pid_t pid = fork();
   if (pid == 0) //子进程
@@ -247,12 +247,8 @@ char *preargv[MAX] = {NULL};
       {
         mymulpipe(preargv, preargc);
       }
-      else if(o_redir==1)
-        oredir(preargv);
-      else if(a_o_redir==1)
-        aoredir(preargv);
       else
-        xecvp(preargv[0], preargv);
+        execvp(preargv[0], preargv);
   }
   else if (pid > 0)
   {
