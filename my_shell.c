@@ -374,6 +374,7 @@ pid_t pid;
   wait(NULL);
 }
 }
+
 void clear_para(){
 cd =0;
 i_redir=0;
